@@ -237,9 +237,8 @@ extension MapViewController: BMKLocationServiceDelegate {
      */
     func didUpdate(_ userLocation: BMKUserLocation!) {
         bmkMapView.updateLocationData(userLocation)
+        bmkMapView.centerCoordinate = userLocation.location.coordinate
         targetCoordinate = userLocation.location.coordinate
-//        reverseGeoSearch(targetCoordinate)
-//        sendPoiNearSearchRequest(targetCoordinate)
         stopLocation()
     }
     
