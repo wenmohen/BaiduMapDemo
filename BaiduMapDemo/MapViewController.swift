@@ -94,41 +94,39 @@ extension MapViewController {
         setupMapView()
         setupTableView()
     }
-    
-    fileprivate func setupMapView() {
-        bmkMapView.zoomLevel = 18
-        setupLocationService()
-        reverseGeoSearch(targetCoordinate)
-//        sendPoiNearSearchRequest(targetCoordinate)
-//        sendSuggestionSearchRequest(targetCoordinate)
-    }
-    
+   
     fileprivate func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.tableFooterView = UIView()
     }
     
-    func setupLocationService() {
+    //地图
+    fileprivate func setupMapView() {
+        bmkMapView.zoomLevel = 18
+        setupLocationService()
+        reverseGeoSearch(targetCoordinate)
+        //        sendPoiNearSearchRequest(targetCoordinate)
+        //        sendSuggestionSearchRequest(targetCoordinate)
+    }
+    //定位
+   fileprivate func setupLocationService() {
         locationService.allowsBackgroundLocationUpdates = true
         locationService.desiredAccuracy = kCLLocationAccuracyBest
         locationService.pausesLocationUpdatesAutomatically = false
         bmkMapView.showsUserLocation = true
-        locationService.distanceFilter = 10
+        locationService.distanceFilter = 100
         setupLocationAccuracyCircle()
         startLocation()
     }
     //设置精度圈
-    func setupLocationAccuracyCircle() {
+   fileprivate func setupLocationAccuracyCircle() {
         let parm = BMKLocationViewDisplayParam()
         parm.accuracyCircleFillColor = UIColor.clear
         parm.accuracyCircleStrokeColor = UIColor.clear
         bmkMapView.updateLocationView(with: parm)
     }
-    
-    func setupLocationManager() {
-        
-    }
+   
 }
 
 extension MapViewController {
