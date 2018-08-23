@@ -21,30 +21,23 @@ class MapViewController: UIViewController {
     @IBOutlet weak var middlePinImageView: UIImageView!
     //地理编码/反地理编码
     var geocodeSearch = BMKGeoCodeSearch()
-
     //周边搜索
     var poiSearch = BMKPoiSearch()
     //地点输入提示检索
     var suggestionSearch = BMKSuggestionSearch()
     //定位
     var locationService = BMKLocationService()
-    //定位
-//    var locationManager = ()
     //当前页数
     var currentPageIndex: Int = 0
-    
     let city = "珠海"
     let keyword = "学校/小区/大厦"
-    
     var targetCoordinate = CLLocationCoordinate2D.init(latitude: 22.212243, longitude: 113.544817) {
         didSet {
              addressArr.removeAll()
              reverseGeoSearch(targetCoordinate)
-//             sendPoiNearSearchRequest(targetCoordinate)
-//             sendSuggestionSearchRequest(targetCoordinate)
        }
     }
-    var addressArr = [PlaceModel]()
+    var addressArr = [PlaceEntity]()
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -285,7 +278,7 @@ extension MapViewController: BMKGeoCodeSearchDelegate {
 //            addressArr.removeAll()
             for (_,poiInfo) in pois.enumerated(){
 //                print("地址名--\(poiInfo.address)---\(poiInfo.name)---")
-                let place = PlaceModel.init(location: poiInfo.pt, addressName: poiInfo.name, addressDetail: poiInfo.address)
+                let place = PlaceEntity.init(location: poiInfo.pt, addressName: poiInfo.name, addressDetail: poiInfo.address)
                 addressArr.append(place)
             }
             tableView.reloadData()
@@ -307,7 +300,7 @@ extension MapViewController: BMKPoiSearchDelegate{
                 let poi = poiResult.poiInfoList[i]
 //                print("地址名--\(poi.name)")
 //                print("城市检索结果------坐标--\(poi.pt)------地址名--\(poi.name)--详细地址--\(poi.address)")
-                let place = PlaceModel.init(location: poi.pt, addressName: poi.name, addressDetail: poi.address)
+                let place = PlaceEntity.init(location: poi.pt, addressName: poi.name, addressDetail: poi.address)
                 addressArr.append(place)
             }
             tableView.reloadData()
@@ -333,7 +326,7 @@ extension MapViewController: BMKSuggestionSearchDelegate {
                 let name = i <= names.count ? names[i] : ""
 //                let address = i <= addresss.count ? addresss[i] : ""
                 print(addresss)
-                let place = PlaceModel.init(location: coordinate, addressName: name, addressDetail: "")
+                let place = PlaceEntity.init(location: coordinate, addressName: name, addressDetail: "")
                 addressArr.append(place)
             }
             tableView.reloadData()

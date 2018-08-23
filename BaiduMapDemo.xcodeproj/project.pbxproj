@@ -18,7 +18,7 @@
 		3B07F483212E4F960036FD87 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B07F482212E4F960036FD87 /* MapViewController.swift */; };
 		3B07F485212E50470036FD87 /* AddressAddMapTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B07F484212E50470036FD87 /* AddressAddMapTableViewCell.swift */; };
 		3B07F489212E62910036FD87 /* LocationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B07F488212E62910036FD87 /* LocationViewController.m */; };
-		3B07F48B212E8CBB0036FD87 /* PlaceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B07F48A212E8CBB0036FD87 /* PlaceModel.swift */; };
+		3B07F48B212E8CBB0036FD87 /* PlaceEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B07F48A212E8CBB0036FD87 /* PlaceEntity.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,7 +59,7 @@
 		3B07F486212E62910036FD87 /* BaiduMapDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BaiduMapDemo-Bridging-Header.h"; sourceTree = "<group>"; };
 		3B07F487212E62910036FD87 /* LocationViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocationViewController.h; sourceTree = "<group>"; };
 		3B07F488212E62910036FD87 /* LocationViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocationViewController.m; sourceTree = "<group>"; };
-		3B07F48A212E8CBB0036FD87 /* PlaceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceModel.swift; sourceTree = "<group>"; };
+		3B07F48A212E8CBB0036FD87 /* PlaceEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceEntity.swift; sourceTree = "<group>"; };
 		BC06509C668F9920A8287726 /* Pods-BaiduMapDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BaiduMapDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-BaiduMapDemo/Pods-BaiduMapDemo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -118,7 +118,7 @@
 				3B07F456212E4D210036FD87 /* ViewController.swift */,
 				3B07F482212E4F960036FD87 /* MapViewController.swift */,
 				3B07F484212E50470036FD87 /* AddressAddMapTableViewCell.swift */,
-				3B07F48A212E8CBB0036FD87 /* PlaceModel.swift */,
+				3B07F48A212E8CBB0036FD87 /* PlaceEntity.swift */,
 				3B07F487212E62910036FD87 /* LocationViewController.h */,
 				3B07F488212E62910036FD87 /* LocationViewController.m */,
 				3B07F458212E4D210036FD87 /* Main.storyboard */,
@@ -344,7 +344,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B07F457212E4D210036FD87 /* ViewController.swift in Sources */,
-				3B07F48B212E8CBB0036FD87 /* PlaceModel.swift in Sources */,
+				3B07F48B212E8CBB0036FD87 /* PlaceEntity.swift in Sources */,
 				3B07F483212E4F960036FD87 /* MapViewController.swift in Sources */,
 				3B07F485212E50470036FD87 /* AddressAddMapTableViewCell.swift in Sources */,
 				3B07F455212E4D210036FD87 /* AppDelegate.swift in Sources */,

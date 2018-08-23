@@ -7,7 +7,7 @@
 //
 
 import UIKit
-struct PlaceModel {
+struct PlaceEntity {
     var addressDetail: String = ""
     var addressName: String = ""
     var location: CLLocationCoordinate2D 
