@@ -9,13 +9,14 @@
 import UIKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, BMKGeneralDelegate{
 
     var window: UIWindow?
-
+    var mapManager = BMKMapManager()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        setupMapLocation()
         return true
     }
 
@@ -44,3 +45,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+extension AppDelegate {
+    func setupMapLocation()  {
+        if BMKMapManager.setCoordinateTypeUsedInBaiduMapSDK(BMK_COORDTYPE_BD09LL) {
+            print("经纬度类型设置成功")
+        }else {
+            print("经纬度类型设置失败")
+        }
+        
+        let ret = mapManager.start("PBfAZ7MZZDpnSUekkQFv2fRC25aRVf2d", generalDelegate: self)
+        if  ret == false {
+            print("manager start failed")
+        }
+    }
+    
+    
+}
+//MARK: -- BMKGeneralDelegate
+extension AppDelegate {
+    func onGetNetworkState(_ iError: Int32) {
+        if 0 == iError {
+            print("联网成功")
+        }else {
+            print("联网失败。错误码：Error\(iError)")
+        }
+    }
+    
+    func onGetPermissionState(_ iError: Int32) {
+        if 0 == iError {
+            print("授权成功")
+        }else {
+            print("授权失败。错误码：Error\(iError)")
+        }
+    }
+}
