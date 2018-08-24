@@ -21,21 +21,24 @@ class MapViewController: UIViewController {
     @IBOutlet weak var middlePinImageView: UIImageView!
     //地理编码/反地理编码
     var geocodeSearch = BMKGeoCodeSearch()
-    //周边搜索
-    var poiSearch = BMKPoiSearch()
-    //地点输入提示检索
-    var suggestionSearch = BMKSuggestionSearch()
     //定位
-    var locationService = BMKLocationService()
-    //当前页数
-    var currentPageIndex: Int = 0
-    let city = "珠海"
-    let keyword = "学校/小区/大厦"
-    var targetCoordinate = CLLocationCoordinate2D.init(latitude: 22.212243, longitude: 113.544817) {
+    lazy var locationService: BMKLocationService = {
+        let service = BMKLocationService()
+        service.allowsBackgroundLocationUpdates = true
+        service.desiredAccuracy = kCLLocationAccuracyBest
+        service.pausesLocationUpdatesAutomatically = false
+        service.distanceFilter = 100
+        return service
+    }()
+    var targetCoordinate = CLLocationCoordinate2D.init(latitude: 22.212243, longitude: 113.544817)
+    //用户已经选择的地址
+    var userCoordinate: CLLocationCoordinate2D? {
         didSet {
-             addressArr.removeAll()
-             reverseGeoSearch(targetCoordinate)
-       }
+            guard let coordinate = userCoordinate else {
+                return
+            }
+            targetCoordinate = coordinate
+        }
     }
     var addressArr = [PlaceEntity]()
     override func viewDidLoad() {
@@ -54,18 +57,14 @@ class MapViewController: UIViewController {
         super.viewWillAppear(animated)
         bmkMapView.delegate = self
         geocodeSearch.delegate = self
-        poiSearch.delegate = self
         locationService.delegate = self
-        suggestionSearch.delegate = self
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         bmkMapView.delegate = nil
         geocodeSearch.delegate = nil
-        poiSearch.delegate = nil
         locationService.delegate = nil
-        suggestionSearch.delegate = nil
     }
     
     /*
@@ -84,8 +83,11 @@ class MapViewController: UIViewController {
     
     //搜索
     @IBAction func didSearchButtonTouchUpInside(_ sender: UIButton) {
-       currentPageIndex = currentPageIndex + 1
-       sendPoiNearSearchRequest(targetCoordinate)
+        guard let targetVC = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "AddressSearchViewController") as? AddressSearchViewController else {
+            return
+        }
+        targetVC.targetCoordinate = targetCoordinate
+        self.navigationController?.pushViewController(targetVC, animated: true)
     }
 }
 
@@ -104,53 +106,27 @@ extension MapViewController {
     //地图
     fileprivate func setupMapView() {
         bmkMapView.zoomLevel = 18
-        setupLocationService()
-        reverseGeoSearch(targetCoordinate)
-        //        sendPoiNearSearchRequest(targetCoordinate)
-        //        sendSuggestionSearchRequest(targetCoordinate)
-    }
-    //定位
-   fileprivate func setupLocationService() {
-        locationService.allowsBackgroundLocationUpdates = true
-        locationService.desiredAccuracy = kCLLocationAccuracyBest
-        locationService.pausesLocationUpdatesAutomatically = false
         bmkMapView.showsUserLocation = true
-        locationService.distanceFilter = 100
-        setupLocationAccuracyCircle()
-        startLocation()
-    }
-    //设置精度圈
-   fileprivate func setupLocationAccuracyCircle() {
+        bmkMapView.userTrackingMode = BMKUserTrackingModeNone
         let parm = BMKLocationViewDisplayParam()
         parm.accuracyCircleFillColor = UIColor.clear
         parm.accuracyCircleStrokeColor = UIColor.clear
         bmkMapView.updateLocationView(with: parm)
+        if userCoordinate == nil {
+            startLocation()
+        }
+        bmkMapView.setCenter(targetCoordinate, animated: true)
     }
-   
 }
 
 extension MapViewController {
     //开始定位
     func startLocation() {
         locationService.startUserLocationService()
-        bmkMapView.userTrackingMode = BMKUserTrackingModeNone
     }
-    //停止定位
+    //结束定位
     func stopLocation() {
         locationService.stopUserLocationService()
-    }
-    
-    //编码：根据地址查找经纬度
-    func geoSearch() {
-        let geocodeSearchOption = BMKGeoCodeSearchOption()
-        geocodeSearchOption.city = city
-        geocodeSearchOption.address = "利时大厦"
-        let flag = geocodeSearch.geoCode(geocodeSearchOption)
-        if flag {
-            print("geo 检索发送成功")
-        } else {
-            print("geo 检索发送失败")
-        }
     }
     
     //反编码：根据经纬度获取地址信息
@@ -164,101 +140,26 @@ extension MapViewController {
             print("反geo 检索发送失败")
         }
     }
-    
-    //城市内检索：POI行政区划检索:行政区划检索是根据关键字检索适用于在「某个行政区划，如北京市、四川省等」搜索某个名称相关的POI，例如：查找北京市的“小吃”。
-    func sendPoiCitySearchRequest() {
-        let citySearchOption = BMKPOICitySearchOption()
-        citySearchOption.pageIndex = currentPageIndex
-        citySearchOption.pageSize = 10
-        citySearchOption.city = city
-        citySearchOption.keyword = keyword
-        if poiSearch.poiSearch(inCity: citySearchOption) {
-            print("城市内检索发送成功！")
-        }else {
-            print("城市内检索发送失败！")
-        }
-    }
-    //POI圆形区域检索:圆形区域检索是一个圆形范围，适用于以某个位置为中心点，自定义检索半径值，搜索某个位置附近的POI。
-    func sendPoiNearSearchRequest(_ coordinate: CLLocationCoordinate2D) {
-        let nearSearchOption = BMKPOINearbySearchOption()
-        nearSearchOption.pageIndex = currentPageIndex
-        nearSearchOption.pageSize = 10
-        nearSearchOption.location = coordinate
-        nearSearchOption.keywords = ["大厦","小区","学校","酒店","餐馆","银行","商场"]
-        nearSearchOption.tags = ["大厦","小区","学校","酒店","餐馆","银行","商场"]
-        if poiSearch.poiSearchNear(by: nearSearchOption) {
-            print("周边检索发送成功！")
-        }else {
-            print("周边检索发送失败！")
-        }
-    }
-    //地点输入提示检索（Sug检索）
-    func sendSuggestionSearchRequest(_ coordinate: CLLocationCoordinate2D) {
-        let suggestionSearchOption = BMKSuggestionSearchOption()
-        suggestionSearchOption.keyword = "大厦"
-        suggestionSearchOption.cityname = "珠海"
-        if suggestionSearch.suggestionSearch(suggestionSearchOption) {
-            print("Sug检索发送成功！")
-        }else {
-            print("Sug检索发送失败！")
-        }
-    }
 }
 
 // MARK: 定位- BMKLocationServiceDelegate
 extension MapViewController: BMKLocationServiceDelegate {
-
-    /**
-     *在地图View将要启动定位时，会调用此函数
-     *@param mapView 地图View
-     */
-    func willStartLocatingUser() {
-        print("willStartLocatingUser");
-    }
-    /**
-     *用户方向更新后，会调用此函数
-     *@param userLocation 新的用户位置
-     */
-    func didUpdateUserHeading(_ userLocation: BMKUserLocation!) {
-  
-    }
     /**
      *用户方向更新后，会调用此函数
      *@param userLocation 新的用户位置
      */
     func didUpdate(_ userLocation: BMKUserLocation!) {
-        bmkMapView.updateLocationData(userLocation)
-        bmkMapView.centerCoordinate = userLocation.location.coordinate
         targetCoordinate = userLocation.location.coordinate
+        bmkMapView.updateLocationData(userLocation)
+        bmkMapView.setCenter(targetCoordinate, animated: true)
+        reverseGeoSearch(targetCoordinate)
+        //必须结束了定位才可以重新定位
         stopLocation()
-    }
-    
-    /**
-     *在地图View停止定位后，会调用此函数
-     *@param mapView 地图View
-     */
-    func didStopLocatingUser() {
-        print("didStopLocatingUser")
     }
 }
 
 // MARK: 地理编码和反地理编码- BMKGeoCodeSearchDelegate
 extension MapViewController: BMKGeoCodeSearchDelegate {
-    /**
-     *返回地址信息搜索结果
-     *@param searcher 搜索对象
-     *@param result 搜索结BMKGeoCodeSearch果
-     *@param error 错误号，@see BMKSearchErrorCode
-     */
-    func onGetGeoCodeResult(_ searcher: BMKGeoCodeSearch!, result: BMKGeoCodeSearchResult!, errorCode error: BMKSearchErrorCode) {
-        print("onGetGeoCodeResult error: \(error)")
-        
-        if error == BMK_SEARCH_NO_ERROR {
-            print("地理编码定位坐标：-----\(result.location)")
-//            bmkMapView.centerCoordinate = result.location
-        }
-    }
-    
     /**
      *返回反地理编码搜索结果
      *@param searcher 搜索对象
@@ -268,14 +169,11 @@ extension MapViewController: BMKGeoCodeSearchDelegate {
     func onGetReverseGeoCodeResult(_ searcher: BMKGeoCodeSearch!, result: BMKReverseGeoCodeSearchResult!, errorCode error: BMKSearchErrorCode) {
         print("onGetReverseGeoCodeResult error: \(error)")
         if error == BMK_SEARCH_NO_ERROR {
-//            print("反地理编码定位坐标：-----\(result.location)")
-//            print("反地理编码定位地址：------\(result.address)")
             guard let pois = result.poiList as? [BMKPoiInfo] else {
                  return
             }
-//            addressArr.removeAll()
+            addressArr.removeAll()
             for (_,poiInfo) in pois.enumerated(){
-//                print("地址名--\(poiInfo.address)---\(poiInfo.name)---")
                 let place = PlaceEntity.init(location: poiInfo.pt, addressName: poiInfo.name, addressDetail: poiInfo.address)
                 addressArr.append(place)
             }
@@ -283,70 +181,22 @@ extension MapViewController: BMKGeoCodeSearchDelegate {
         }
     }
 }
-// MARK: 周围检索- BMKPoiSearchDelegate
-extension MapViewController: BMKPoiSearchDelegate{
-    /**
-     *返回POI搜索结果
-     *@param searcher 搜索对象
-     *@param poiResult 搜索结果列表
-     *@param errorCode 错误号，@see BMKSearchErrorCode
-     */
-    func onGetPoiResult(_ searcher: BMKPoiSearch!, result poiResult: BMKPOISearchResult!, errorCode: BMKSearchErrorCode) {
-        print("onGetPoiResult code: \(errorCode)");
-        if errorCode == BMK_SEARCH_NO_ERROR {
-            for i in 0..<poiResult.poiInfoList.count {
-                let poi = poiResult.poiInfoList[i]
-//                print("地址名--\(poi.name)")
-//                print("城市检索结果------坐标--\(poi.pt)------地址名--\(poi.name)--详细地址--\(poi.address)")
-                let place = PlaceEntity.init(location: poi.pt, addressName: poi.name, addressDetail: poi.address)
-                addressArr.append(place)
-            }
-            tableView.reloadData()
-        } else if errorCode == BMK_SEARCH_AMBIGUOUS_KEYWORD {
-            print("检索词有歧义")
-        } else {
-            // 各种情况的判断……
-            print("各种情况的判断")
-        }
-    }
-}
-//MARK:--Sug检索--BMKSuggestionSearchDelegate
-extension MapViewController: BMKSuggestionSearchDelegate {
-    func onGetSuggestionResult(_ searcher: BMKSuggestionSearch!, result: BMKSuggestionResult!, errorCode error: BMKSearchErrorCode) {
-        print("onGetSuggestionResult code: \(error)");
-        if error == BMK_SEARCH_NO_ERROR {
-            guard let names = result.keyList as? [String],names.count > 0, let addresss = result.districtList as? [String], let coordinates = result.ptList as? [NSValue] else {
-                return
-            }
-            for i in 0..<coordinates.count {
-                let value = coordinates[i]
-                let coordinate = CLLocationCoordinate2D.init(latitude:CLLocationDegrees(CGFloat(value.cgPointValue.x)), longitude: CLLocationDegrees(CGFloat(value.cgPointValue.y)))
-                let name = i <= names.count ? names[i] : ""
-//                let address = i <= addresss.count ? addresss[i] : ""
-                print(addresss)
-                let place = PlaceEntity.init(location: coordinate, addressName: name, addressDetail: "")
-                addressArr.append(place)
-            }
-            tableView.reloadData()
-        } else if error == BMK_SEARCH_AMBIGUOUS_KEYWORD {
-            print("检索词有歧义")
-        } else {
-            // 各种情况的判断……
-            print("各种情况的判断")
-        }
-    }
-}
+
 //MARK:--地图--BMKMapViewDelegate
 extension MapViewController: BMKMapViewDelegate {
-
+    //移动地图调用
     func mapView(_ mapView: BMKMapView!, regionDidChangeAnimated animated: Bool) {
-       let coordinate = bmkMapView.convert(bmkMapView.center, toCoordinateFrom: bmkMapView)
-       
-        targetCoordinate = coordinate
+       var region = BMKCoordinateRegion()
+        region.center = mapView.region.center
+        targetCoordinate = region.center
+        reverseGeoSearch(targetCoordinate)
     }
-    
+    //地图渲染完调用
     func mapViewDidFinishLoading(_ mapView: BMKMapView!) {
-       bmkMapView.centerCoordinate = targetCoordinate
+        var region = BMKCoordinateRegion()
+        region.center = mapView.region.center
+        targetCoordinate = region.center
+        reverseGeoSearch(targetCoordinate)
     }
 }
 // MARK: - Delegate, Datasource of tableview

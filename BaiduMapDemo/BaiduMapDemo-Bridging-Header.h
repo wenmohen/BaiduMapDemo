@@ -11,7 +11,7 @@
 //#import <BaiduMapAPI_Cloud/BMKCloudSearchComponent.h>
 //#import <BaiduMapAPI_Radar/BMKRadarComponent.h>
 #import <BaiduMapAPI_Search/BMKSearchComponent.h>
-//#import <BaiduMapAPI_Utils/BMKUtilsComponent.h>
+#import <BaiduMapAPI_Utils/BMKUtilsComponent.h>
 
 //#import "BMKClusterManager.h"
 //#import "PromptInfo.h"
