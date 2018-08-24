@@ -135,9 +135,11 @@ extension MapViewController {
         reverseGeocodeSearchOption.location = coordinate
         let flag = geocodeSearch.reverseGeoCode(reverseGeocodeSearchOption)
         if flag {
-            print("反geo 检索发送成功")
+            //反geo 检索发送成功
         } else {
-            print("反geo 检索发送失败")
+            //反geo 检索发送失败
+            addressArr.removeAll()
+            tableView.reloadData()
         }
     }
 }
@@ -177,6 +179,9 @@ extension MapViewController: BMKGeoCodeSearchDelegate {
                 let place = PlaceEntity.init(location: poiInfo.pt, addressName: poiInfo.name, addressDetail: poiInfo.address)
                 addressArr.append(place)
             }
+            tableView.reloadData()
+        }else {
+            addressArr.removeAll()
             tableView.reloadData()
         }
     }
